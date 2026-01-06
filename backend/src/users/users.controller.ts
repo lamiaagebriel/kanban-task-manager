@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Put } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
 import { ZodBody, ZodParam } from 'src/validations/decorators/zod.decorator';
 import { UsersService } from './users.service';
 import { validations, type Validation } from './users.validations';
@@ -33,7 +33,10 @@ export class UsersController {
   }
 
   @Post()
-  async create(@Body() body: Validation['create-user']) {
+  async create(
+    @ZodBody(validations['create-user'])
+    body: Validation['create-user'],
+  ) {
     const user = await this.usersService.create(body);
 
     return {

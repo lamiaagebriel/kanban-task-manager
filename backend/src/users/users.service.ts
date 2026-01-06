@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import z from 'zod';
 import { User } from './entities/user.entity';
 import { Validation, validations } from './users.validations';
 
@@ -13,11 +14,37 @@ export class UsersService {
   ) {}
 
   // Helper to remove password from returned user objects
-  private sanitizeUser(user: User | null): Omit<User, 'password'> | null {
+  private sanitizeUser(user: User | null) {
     if (!user) return null;
 
     const { password, ...safeUser } = user;
-    return safeUser as Omit<User, 'password'>;
+    return safeUser;
+  }
+
+  async validateCredentials(props: Validation['validate-credentials']) {
+    const { email, password } =
+      validations['validate-credentials'].parse(props);
+    const user = await this.usersRepository.findOneBy({ email });
+    if (!user)
+      throw new z.ZodError([
+        {
+          code: z.ZodIssueCode.custom,
+          message: 'Invalid email',
+          path: ['email'],
+        },
+      ]);
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid)
+      throw new z.ZodError([
+        {
+          code: z.ZodIssueCode.custom,
+          message: 'Incorrect password',
+          path: ['password'],
+        },
+      ]);
+
+    return this.sanitizeUser(user) as Omit<User, 'password'>;
   }
 
   async findAll() {
@@ -42,7 +69,14 @@ export class UsersService {
     const existingUser = await this.usersRepository.findOneBy({
       email: parsed.email,
     });
-    if (existingUser) throw new Error('A user with this email already exists.');
+    if (existingUser)
+      throw new z.ZodError([
+        {
+          code: z.ZodIssueCode.custom,
+          message: 'email is already used.',
+          path: ['email'],
+        },
+      ]);
 
     // Hash the password before storing
     const hashedPassword = await bcrypt.hash(parsed.password, 10);

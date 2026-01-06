@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
+import jwtConfig from './config/jwt.config';
 import { UsersModule } from './users/users.module';
 import { ZodGlobalExceptionFilter } from './validations/filters/zod-global-exception.filter';
 import { ZodResponseInterceptor } from './validations/interceptors/zod-response.interceptor';
@@ -13,7 +16,7 @@ import { ZodResponseInterceptor } from './validations/interceptors/zod-response.
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, appConfig],
+      load: [databaseConfig, jwtConfig, appConfig],
       envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
@@ -31,6 +34,7 @@ import { ZodResponseInterceptor } from './validations/interceptors/zod-response.
       }),
       inject: [ConfigService],
     }),
+    AuthModule,
     UsersModule,
   ],
   controllers: [AppController],
@@ -42,6 +46,10 @@ import { ZodResponseInterceptor } from './validations/interceptors/zod-response.
     {
       provide: APP_INTERCEPTOR,
       useClass: ZodResponseInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
   ],
 })

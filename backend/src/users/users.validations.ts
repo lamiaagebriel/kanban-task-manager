@@ -1,6 +1,6 @@
 import z from 'zod';
 
-const userSchema = z.object({
+export const userSchema = z.object({
   id: z
     .union([z.string(), z.number()])
     .transform((val) => (typeof val === 'string' ? Number(val) : val))
@@ -30,6 +30,7 @@ const userSchema = z.object({
 
 export const validations = {
   'tagret-user-by-id': userSchema.pick({ id: true }),
+  'validate-credentials': userSchema.pick({ email: true, password: true }),
 
   'create-user': userSchema.pick({
     name: true,
