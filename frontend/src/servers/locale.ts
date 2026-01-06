@@ -3,8 +3,8 @@
 import { cookies as nextCookies } from "next/headers";
 
 import { ensureValidLocale, LOCALE_COOKIE_KEY } from "@/lib/locale";
+import { createServerAction } from "@/lib/utils";
 import { Validation, validations } from "@/lib/validations";
-import { createServerAction } from "@/servers/utils";
 
 const site = {
   si: () => import("@/dic/si").then((module) => module?.default),
