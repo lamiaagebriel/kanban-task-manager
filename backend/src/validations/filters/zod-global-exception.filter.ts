@@ -6,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { ZodError } from 'zod';
 import { ZodValidationException } from '../exceptions/zod.exception';
 import { ZodResponseError } from '../types/zod-response.type';
 
@@ -18,8 +19,16 @@ export class ZodGlobalExceptionFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let errorResponse: ZodResponseError;
 
+    // Handle ZodError (Zod errors)
+    if (exception instanceof ZodError) {
+      status = HttpStatus.BAD_REQUEST;
+      errorResponse = {
+        ok: false,
+        zodIssues: exception.issues,
+      };
+    }
     // Handle ZodValidationException (Zod errors)
-    if (exception instanceof ZodValidationException) {
+    else if (exception instanceof ZodValidationException) {
       status = HttpStatus.BAD_REQUEST;
       errorResponse = {
         ok: false,
