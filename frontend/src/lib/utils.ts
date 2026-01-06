@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { Dictionary } from "@/lib/locale";
 import { getDictionary } from "@/servers/locale";
-import { OnSuccess, ServerActionResult } from "@/types";
+import { OnError, OnSuccess, ServerActionResult } from "@/types";
 import type { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -52,48 +52,56 @@ export function createServerAction<T, R>(
 }
 
 // Client-side handler for the above server action result
-export function handleServerAction<T, R>(
-  actionFn: (data: T) => Promise<ServerActionResult<R>>,
+export async function handleServerAction<R>(
+  actionFn:
+    | Promise<ServerActionResult<R>>
+    | (() => Promise<ServerActionResult<R>>),
   options?: {
     form?: UseFormReturn<any>;
     setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+    onSuccess?: (data: OnSuccess<R>) => void;
+    onError?: (data: OnError) => void;
   }
 ) {
-  return async (data: T): Promise<OnSuccess<R>> => {
-    const { form, setLoading } = options ?? {};
-    setLoading?.(true);
+  const { form, setLoading, onSuccess, onError } = options ?? {};
+  setLoading?.(true);
 
-    try {
-      const result = await actionFn(data);
+  try {
+    const result =
+      typeof actionFn === "function" ? await actionFn() : await actionFn;
 
-      if (!result) return;
-      if (result.ok) return result;
-
+    if (!result) return;
+    if (!result.ok) {
       // Handler for error type 1 (validation issues)
       if ("zodIssues" in result && Array.isArray(result?.zodIssues)) {
         if (!form) {
-          if (process.env.NODE_ENV !== "production") {
+          if (process.env.NODE_ENV !== "production")
             throw new Error("form is missing in handleServerAction.");
-          }
+
           return;
         }
 
-        result.zodIssues.forEach((e) => {
+        result?.zodIssues?.forEach((e) => {
           const path = e?.path?.join(".");
-          if (!path) {
-            toast.error(e?.message!);
-            return;
-          }
-          form.setError(path as any, { message: e?.message! });
+          if (!path) return toast.error(e?.message!);
+
+          form?.setError(path as any, { message: e?.message! });
         });
       }
 
       // Handler for error type 2 (general server-side error)
-      if ("message" in result && typeof result?.message === "string") {
-        toast.error(result.message);
-      }
-    } finally {
-      setLoading?.(false);
+      if ("message" in result && typeof result?.message === "string")
+        toast.error(result?.message);
+
+      onError?.(result);
     }
-  };
+
+    if (result.ok) {
+      onSuccess?.(result);
+      // if (result?.toast) toast[result?.toast?.type]?.(result?.toast?.message);
+      // if (result?.redirect) redirect(result?.redirect);
+    }
+  } finally {
+    setLoading?.(false);
+  }
 }

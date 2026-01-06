@@ -15,11 +15,9 @@ import { Button } from "./ui/button";
 
 import { useLocale } from "@/components/locale-provider";
 import { Link } from "@/components/ui/link";
-import { Paths } from "@/lib/const";
 import { handleServerAction } from "@/lib/utils";
 import { loginWithPassword } from "@/servers/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { redirect } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -39,9 +37,10 @@ export function LoginForm() {
   });
 
   const onSubmit = async (values: FormSchema) => {
-    await handleServerAction(loginWithPassword, { form, setLoading })(values);
-
-    redirect(Paths.Dashboard);
+    await handleServerAction(() => loginWithPassword(values), {
+      form,
+      setLoading,
+    });
   };
   return (
     <form

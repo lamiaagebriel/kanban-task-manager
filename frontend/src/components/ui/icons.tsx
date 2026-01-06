@@ -1,5 +1,12 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { GalleryVerticalEnd, Loader2, type LucideProps } from "lucide-react";
+import {
+  FolderCode,
+  GalleryVerticalEnd,
+  Loader2,
+  LogOut,
+  User,
+  type LucideProps,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -19,5 +26,14 @@ export const Icons = {
       className={cn(IconsVariants({}), "animate-spin", className)}
       {...props}
     />
+  ),
+  user: ({ className, ...props }: IconProps) => (
+    <User className={cn(IconsVariants({}), className)} {...props} />
+  ),
+  logout: ({ className, ...props }: IconProps) => (
+    <LogOut className={cn(IconsVariants({}), className)} {...props} />
+  ),
+  folder: ({ className, ...props }: IconProps) => (
+    <FolderCode className={cn(IconsVariants({}), className)} {...props} />
   ),
 };

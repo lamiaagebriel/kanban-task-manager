@@ -4,7 +4,11 @@ const en = {
     description:
       "Kanboard is a streamlined kanban task manager designed to help teams and individuals organize, track, and prioritize their work with ease. Effortlessly create boards, manage tasks, set deadlines, and collaborate in real time. Our intuitive interface and powerful features empower users to visualize workflows, improve productivity, and deliver projects efficiently.",
   },
-  cmn: { Continue: "Continue", Logout: "Logout" },
+  cmn: {
+    Continue: "Continue",
+    Logout: "Logout",
+    "Sign up": "Sign up",
+  },
   "/login": {
     Login: "Login",
     "Sign up": "Sign up",
@@ -32,6 +36,13 @@ const en = {
   },
   "/dashboard": {
     Dashboard: "Dashboard",
+    "create, browse, edit, and filter all projects easily.":
+      "Create, browse, edit, and filter all projects easily.",
+
+    "No Projects Yet": "No Projects Yet",
+    "You haven't created any projects yet. Get started by creating your first project.":
+      "You haven't created any projects yet. Get started by creating your first project.",
+    "Create Project": "Create Project",
   },
   actions: {
     "An unexpected error occured, Please try again later.":

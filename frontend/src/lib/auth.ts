@@ -1,49 +1,55 @@
-import { cookies as nextCookies } from "next/headers";
-import { NextRequest } from "next/server";
+import { api } from "@/api";
+import { getCookie, setCookie } from "@/servers/utils";
 import { cache } from "react";
 
 export type Session = {
   userId: string;
   expires: number;
+  token: string;
 };
 
 export type User = {
   id: string;
   email: string;
   name: string;
+  image?: string;
 };
 
-export const SESSION_COOKIE_NAME = "session";
-export const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
+const SESSION_COOKIE_NAME = "session";
+const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
-interface SessionData {
-  userId: string;
-  expires: number;
-}
-
-function encodeSession(session: SessionData): string {
-  // Simple base64 encoding; in production, sign & encrypt!
+function encodeSession(session: Session): string {
   return Buffer.from(JSON.stringify(session), "utf-8").toString("base64");
 }
 
-function decodeSession(token: string): SessionData | null {
+function decodeSession(token: string): Session | null {
   try {
     const decoded = Buffer.from(token, "base64").toString();
     const data = JSON.parse(decoded);
-    if (typeof data.userId === "string" && typeof data.expires === "number") {
+    if (
+      typeof data.userId === "string" &&
+      typeof data.expires === "number" &&
+      typeof data.token === "string"
+    )
       return data;
-    }
+
     return null;
   } catch {
     return null;
   }
 }
 
-// --- Create/set cookies ---
-export function createSessionCookie(session: SessionData) {
-  return {
+export async function createSessionCookie(
+  session: Pick<Session, "userId" | "token">
+) {
+  const sessionObj: Session = {
+    expires: Date.now() + SESSION_DURATION_MS,
+    ...session,
+  };
+
+  const sessionCookie = {
     name: SESSION_COOKIE_NAME,
-    value: encodeSession(session),
+    value: encodeSession(sessionObj),
     attributes: {
       httpOnly: true,
       path: "/",
@@ -52,10 +58,22 @@ export function createSessionCookie(session: SessionData) {
       sameSite: "lax",
     } as const,
   };
+
+  try {
+    await setCookie(
+      sessionCookie.name,
+      sessionCookie.value,
+      sessionCookie.attributes
+    );
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Failed to set session cookie", err);
+    }
+  }
 }
 
-export function createBlankSessionCookie() {
-  return {
+export async function clearSessionCookie() {
+  const sessionCookie = {
     name: SESSION_COOKIE_NAME,
     value: "",
     attributes: {
@@ -66,80 +84,51 @@ export function createBlankSessionCookie() {
       sameSite: "lax",
     } as const,
   };
+  try {
+    await setCookie(
+      sessionCookie.name,
+      sessionCookie.value,
+      sessionCookie.attributes
+    );
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Failed to clear expired session cookie", err);
+    }
+  }
 }
 
-/**
- * Checks if a 'session' cookie exists and is non-empty.
- * (Does not validate the session, for simplicity/edge compatibility.)
- */
-export function isSignedIn(request: NextRequest): boolean {
-  const cookie = request.cookies.get(SESSION_COOKIE_NAME);
-  return !!cookie && cookie.value !== "";
-}
-
-// --- Session lookup ---
 export const uncachedGetAuth = async (): Promise<
   { user: User; session: Session } | { user: null; session: null }
 > => {
-  const cookies = await nextCookies();
-  const sessionToken = cookies.get(SESSION_COOKIE_NAME)?.value ?? null;
+  const sessionToken = await getCookie(SESSION_COOKIE_NAME);
   if (!sessionToken) return { user: null, session: null };
 
   const session = decodeSession(sessionToken);
   if (
-    !session
-    // || typeof session.userId !== "string" ||
-    // typeof session.expires !== "number" ||
-    // session.expires < Date.now()
+    !session ||
+    typeof session.userId !== "string" ||
+    typeof session.expires !== "number" ||
+    typeof session.token !== "string" ||
+    session.expires < Date.now()
   ) {
-    // // Session is invalid or expired
-    // const blank = createBlankSessionCookie();
-    // try {
-    //   cookies.set(blank.name, blank.value, blank.attributes);
-    // } catch (err) {
-    //   // Ignore error (can be render-on-page)
-    //   if (process.env.NODE_ENV !== "production") {
-    //     // Avoid log spam in prod
-    //     console.log("Failed to clear expired session cookie", err);
-    //   }
-    // }
+    // Session is invalid or expired
+    await clearSessionCookie();
+
     return { user: null, session: null };
   }
 
-  // --- TODO: Replace with real user-lookup by ID from DB or source ---
-  // The code below is hardcoded! In production, replace with user lookup.
-  const user: User | null = {
-    id: "1",
-    name: "Lamiaa Gebriel",
-    email: "lamiaadev@gmail.com",
-  };
+  const {
+    data: { user },
+  } = await api.users.getOne({ id: session?.userId });
 
   if (!user) {
-    // const blank = createBlankSessionCookie();
-    // try {
-    //   cookies.set(blank.name, blank.value, blank.attributes);
-    // } catch (err) {
-    //   if (process.env.NODE_ENV !== "production") {
-    //     console.log("Failed to clear user-not-found session cookie", err);
-    //   }
-    // }
+    await clearSessionCookie();
     return { user: null, session: null };
   }
 
   // // Optionally renew (refresh) session if within threshold (less than half-time left)
   // if (session.expires - Date.now() < SESSION_DURATION_MS / 2) {
-  //   const freshSession: SessionData = {
-  //     userId: user.id,
-  //     expires: Date.now() + SESSION_DURATION_MS,
-  //   };
-  //   const freshCookie = createSessionCookie(freshSession);
-  //   try {
-  //     cookies.set(freshCookie.name, freshCookie.value, freshCookie.attributes);
-  //   } catch (err) {
-  //     if (process.env.NODE_ENV !== "production") {
-  //       console.log("Failed to refresh session cookie", err);
-  //     }
-  //   }
+  //   await createSessionCookie(user.id, session.token);
   // }
 
   return {
@@ -147,6 +136,7 @@ export const uncachedGetAuth = async (): Promise<
     session: {
       userId: user.id,
       expires: session.expires, // keep the original expiry, unless renewed
+      token: session.token,
     },
   };
 };

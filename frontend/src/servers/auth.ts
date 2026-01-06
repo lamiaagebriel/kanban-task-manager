@@ -1,35 +1,31 @@
 "use server";
 
-import { cookies as nextCookies } from "next/headers";
-
-import {
-  createBlankSessionCookie,
-  createSessionCookie,
-  getAuth,
-} from "@/lib/auth";
+import { clearSessionCookie, createSessionCookie, getAuth } from "@/lib/auth";
+import { Paths } from "@/lib/const";
 import { createServerAction } from "@/lib/utils";
 import { Validation, validations } from "@/lib/validations";
 import { getDictionary } from "@/servers/locale";
 
 export const loginWithPassword = createServerAction(
   async (formData: Validation["login-with-password"]) => {
-    const data = validations["login-with-password"]?.parse(formData);
-    const cookies = await nextCookies();
+    const { email, password } =
+      validations["login-with-password"]?.parse(formData);
 
-    const existingUser = { id: "1", name: "Lamiaa Gebriel", ...data };
+    // In a real app, you would check against a database
+    if (email !== "lamiaadev@gmail.com") throw Error("Invalid credentials.");
 
-    const sessionCookie = createSessionCookie({
-      userId: existingUser?.id,
-      expires: 0,
-    });
+    const token = "token_1";
+    const user = {
+      id: "1",
+      name: "Lamiaa Gebriel",
+      email,
+      image: "https://github.com/shadcn.png",
+    };
+    // In a real app, you would add user to a database and validate.
+    // Here we just return a dummy user object.
+    await createSessionCookie({ userId: user?.id, token });
 
-    cookies.set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
-
-    return { ok: true };
+    return { ok: true, redirect: Paths.Dashboard };
   },
   {
     defaultErrorMessage:
@@ -39,40 +35,33 @@ export const loginWithPassword = createServerAction(
 
 export const registerWithPassword = createServerAction(
   async (formData: Validation["register-with-password"]) => {
-    const data = validations["register-with-password"]?.parse(formData);
-    const cookies = await nextCookies();
+    const { name, email, password } =
+      validations["register-with-password"]?.parse(formData);
 
-    const existingUser = { id: "1", ...data };
+    const token = "token_1";
+    const user = {
+      id: "1",
+      name,
+      email,
+      image: "https://github.com/shadcn.png",
+    };
+    // In a real app, you would add user to a database and validate.
+    // Here we just return a dummy user object.
+    await createSessionCookie({ userId: user?.id, token });
 
-    const sessionCookie = createSessionCookie({
-      userId: existingUser?.id,
-      expires: 0,
-    });
-    cookies.set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
-
-    return { ok: true };
+    return { ok: true, redirect: Paths.Dashboard };
   },
   {
     defaultErrorMessage: "your user account was not created. please try again.",
   }
 );
 
-export const logout = createServerAction(async () => {
-  const cookies = await nextCookies();
+export const logout = createServerAction(async (_: void) => {
   const { actions: c } = await getDictionary();
   const { session } = await getAuth();
   if (!session) throw new Error(c["you are not logged in."]);
 
-  const sessionCookie = createBlankSessionCookie();
-  cookies.set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes
-  );
+  await clearSessionCookie();
 
-  return { ok: true };
+  return { ok: true, redirect: Paths.Login };
 });

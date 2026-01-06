@@ -15,11 +15,9 @@ import { Button } from "./ui/button";
 
 import { useLocale } from "@/components/locale-provider";
 import { Link } from "@/components/ui/link";
-import { Paths } from "@/lib/const";
 import { handleServerAction } from "@/lib/utils";
 import { registerWithPassword } from "@/servers/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { redirect } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -51,10 +49,10 @@ export function RegisterForm() {
   });
 
   const onSubmit = async (values: FormSchema) => {
-    await handleServerAction(registerWithPassword, { form, setLoading })(
-      values
-    );
-    redirect(Paths.Dashboard);
+    await handleServerAction(() => registerWithPassword(values), {
+      form,
+      setLoading,
+    });
   };
   return (
     <form
