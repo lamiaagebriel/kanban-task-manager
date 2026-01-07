@@ -1,11 +1,9 @@
 "use client";
 
-import { Session, User } from "@/lib/auth";
+import { GetAuthResponse } from "@/lib/auth";
 import * as React from "react";
 
-type AuthContextProps =
-  | { user: User; session: Session }
-  | { user: null; session: null };
+type AuthContextProps = GetAuthResponse;
 type AuthProviderProps = React.PropsWithChildren<{
   value: AuthContextProps;
 }>;

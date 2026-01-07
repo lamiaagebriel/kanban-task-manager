@@ -51,7 +51,7 @@ export function UserAccountNav({ items = [] }: UserAccountNavProps) {
             buttonVariants({ variant: "outline", size: "icon" }),
             "rounded-full"
           )}>
-          <AvatarImage src={user?.image!} alt={user?.name ?? ""} />
+          <AvatarImage src={(user as any)?.image!} alt={user?.name ?? ""} />
           <AvatarFallback className="bg-transparent">
             <Icons.user />
           </AvatarFallback>

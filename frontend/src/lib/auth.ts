@@ -1,5 +1,6 @@
 import { api } from "@/api";
 import { getCookie, setCookie } from "@/servers/utils";
+import { User } from "@/types";
 import { cache } from "react";
 
 export type Session = {
@@ -8,12 +9,9 @@ export type Session = {
   token: string;
 };
 
-export type User = {
-  id: string;
-  email: string;
-  name: string;
-  image?: string;
-};
+export type GetAuthResponse =
+  | { user: User; session: Session }
+  | { user: null; session: null };
 
 const SESSION_COOKIE_NAME = "session";
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
@@ -92,14 +90,20 @@ export async function clearSessionCookie() {
     );
   } catch (err) {
     if (process.env.NODE_ENV !== "production") {
-      console.log("Failed to clear expired session cookie", err);
+      console.error("Failed to clear expired session cookie", err);
     }
   }
 }
 
-export const uncachedGetAuth = async (): Promise<
-  { user: User; session: Session } | { user: null; session: null }
-> => {
+export async function getSessionCookie() {
+  const sessionToken = await getCookie(SESSION_COOKIE_NAME);
+  if (!sessionToken) return null;
+
+  const session = decodeSession(sessionToken);
+  return session;
+}
+
+export const uncachedGetAuth = async (): Promise<GetAuthResponse> => {
   const sessionToken = await getCookie(SESSION_COOKIE_NAME);
   if (!sessionToken) return { user: null, session: null };
 
@@ -117,9 +121,19 @@ export const uncachedGetAuth = async (): Promise<
     return { user: null, session: null };
   }
 
-  const {
-    data: { user },
-  } = await api.users.getOne({ id: session?.userId });
+  let user = null;
+  try {
+    const {
+      data: { user: fetchedUser },
+    } = await api.users.findOne({ id: Number(session?.userId) });
+
+    user = fetchedUser;
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Failed to fetch user in getAuth:", error);
+    }
+    user = null;
+  }
 
   if (!user) {
     await clearSessionCookie();
@@ -128,13 +142,16 @@ export const uncachedGetAuth = async (): Promise<
 
   // // Optionally renew (refresh) session if within threshold (less than half-time left)
   // if (session.expires - Date.now() < SESSION_DURATION_MS / 2) {
-  //   await createSessionCookie(user.id, session.token);
+  //   await createSessionCookie({
+  //     userId: user?.id?.toString(),
+  //     token: session.token,
+  //   });
   // }
 
   return {
     user,
     session: {
-      userId: user.id,
+      userId: user?.id?.toString(),
       expires: session.expires, // keep the original expiry, unless renewed
       token: session.token,
     },
