@@ -1,29 +1,23 @@
 "use server";
 
+import { api } from "@/api";
 import { clearSessionCookie, createSessionCookie, getAuth } from "@/lib/auth";
 import { Paths } from "@/lib/const";
 import { createServerAction } from "@/lib/utils";
-import { Validation, validations } from "@/lib/validations";
+import { Validation } from "@/lib/validations";
 import { getDictionary } from "@/servers/locale";
 
 export const loginWithPassword = createServerAction(
   async (formData: Validation["login-with-password"]) => {
-    const { email, password } =
-      validations["login-with-password"]?.parse(formData);
+    const {
+      data: { user, access_token },
+    } = await api.auth.loginWithPassword(formData);
+    if (!user) throw Error();
 
-    // In a real app, you would check against a database
-    if (email !== "lamiaadev@gmail.com") throw Error("Invalid credentials.");
-
-    const token = "token_1";
-    const user = {
-      id: "1",
-      name: "Lamiaa Gebriel",
-      email,
-      image: "https://github.com/shadcn.png",
-    };
-    // In a real app, you would add user to a database and validate.
-    // Here we just return a dummy user object.
-    await createSessionCookie({ userId: user?.id, token });
+    await createSessionCookie({
+      userId: user?.id?.toString(),
+      token: access_token,
+    });
 
     return { ok: true, redirect: Paths.Dashboard };
   },
@@ -35,19 +29,15 @@ export const loginWithPassword = createServerAction(
 
 export const registerWithPassword = createServerAction(
   async (formData: Validation["register-with-password"]) => {
-    const { name, email, password } =
-      validations["register-with-password"]?.parse(formData);
+    const {
+      data: { user, access_token },
+    } = await api.auth.registerWithPassword(formData);
+    if (!user) throw Error();
 
-    const token = "token_1";
-    const user = {
-      id: "1",
-      name,
-      email,
-      image: "https://github.com/shadcn.png",
-    };
-    // In a real app, you would add user to a database and validate.
-    // Here we just return a dummy user object.
-    await createSessionCookie({ userId: user?.id, token });
+    await createSessionCookie({
+      userId: user?.id?.toString(),
+      token: access_token,
+    });
 
     return { ok: true, redirect: Paths.Dashboard };
   },

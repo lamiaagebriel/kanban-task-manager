@@ -1,12 +1,11 @@
-export const users = {
-  getOne: async ({ id }: { id: string }) => {
-    const user = {
-      id: "1",
-      name: "Lamiaa Gebriel",
-      email: "lamiaadev@gmail.com",
-      image: "https://github.com/shadcn.png",
-    };
+import { fetcher } from "@/lib/utils";
+import { Validation, validations } from "@/lib/validations";
+import { User } from "@/types";
 
-    return { ok: true, data: { user } };
+export const users = {
+  findOne: async (formData: Validation["tagret-user-by-id"]) => {
+    const { id } = validations["tagret-user-by-id"].parse(formData);
+
+    return fetcher<{ user: User | null }>(`/api/users/${id}`);
   },
 };

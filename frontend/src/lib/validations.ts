@@ -1,11 +1,19 @@
-import { i18n } from "@/lib/locale";
 import z from "zod";
+import { i18n } from "./locale";
 
 const userSchema = z.object({
+  id: z
+    .union([z.string(), z.number()])
+    .transform((val) => (typeof val === "string" ? Number(val) : val))
+    .pipe(z.number().int().positive("id must be a positive integer")),
   name: z
     .string()
-    .min(5, "Name must be at least 5 characters.")
-    .max(64, "Name must be at most 64 characters."),
+    .min(2, "Name must be at least 2 characters.")
+    .max(64, "Name must be at most 64 characters.")
+    .regex(
+      /^[a-zA-Z\s'-]+$/,
+      "Name can only contain letters, spaces, apostrophes, and dashes."
+    ),
   email: z
     .string()
     .email("Please enter a valid email address.")
@@ -14,9 +22,18 @@ const userSchema = z.object({
   password: z
     .string()
     .min(8, "Password must be at least 8 characters.")
-    .max(100, "Password must be at most 100 characters."),
+    .max(100, "Password must be at most 100 characters.")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+    ),
 });
-export const authValidations = {
+
+const userValidations = {
+  "tagret-user-by-id": userSchema.pick({ id: true }),
+};
+
+const authValidations = {
   "login-with-password": userSchema.pick({
     email: true,
     password: true,
@@ -29,8 +46,10 @@ export const authValidations = {
 };
 
 export const validations = {
-  ...authValidations,
   "locale-switcher": z.object({ locale: z.enum(i18n?.locales) }),
+
+  ...userValidations,
+  ...authValidations,
 };
 
 export type ValidationName = keyof typeof validations;

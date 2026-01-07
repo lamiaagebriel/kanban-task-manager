@@ -8,10 +8,44 @@ import { getDictionary } from "@/servers/locale";
 import { OnError, OnSuccess, ServerActionResult } from "@/types";
 import type { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
+import { getSessionCookie } from "./auth";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const fetcher = async <T = void>(
+  _url: string,
+  { ...options }: RequestInit = {}
+): Promise<{ data: T }> => {
+  const SERVER_URL = "http://localhost:8000";
+
+  const token = (await getSessionCookie())?.token ?? null;
+
+  const url = `${SERVER_URL}${_url}`;
+
+  // NOTE: as all the api responses are wrapped in a json object
+  const response = await fetch(url, {
+    method: "GET",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options?.headers,
+    },
+  });
+
+  const { ok, ...data } = await response?.json();
+  if (!ok) {
+    if (data?.zodIssues) throw new z.ZodError(data?.zodIssues);
+    throw new Error(
+      data?.message ?? "an unexpected error occured, please try again later."
+    );
+  }
+
+  // only return data from the response
+  return { ...data } as { data: T };
+};
 
 /**
  * A wrapper to standardize server action error handling, targeting two types of errors:

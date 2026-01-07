@@ -3,7 +3,7 @@ import { ZodBody, ZodParam } from 'src/validations/decorators/zod.decorator';
 import { UsersService } from './users.service';
 import { validations, type Validation } from './users.validations';
 
-@Controller('users')
+@Controller('api/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -28,7 +28,7 @@ export class UsersController {
 
     return {
       ok: true,
-      data: user,
+      data: { user },
     };
   }
 

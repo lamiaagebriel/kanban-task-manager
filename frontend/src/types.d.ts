@@ -10,3 +10,12 @@ export type OnError = { ok: false } & (
   | { zodIssues: z.ZodIssue[] }
   | { message: string }
 );
+
+// db schemas
+export type User = {
+  id: number;
+  email: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
