@@ -1,4 +1,13 @@
+import { Icons } from "@/components/ui/icons";
 import { z } from "zod";
+
+export type SelectItem = {
+  value: string;
+  children: string | React.ReactNode;
+  disabled?: boolean;
+  icon?: keyof typeof Icons;
+  // color?: string;
+};
 
 export type ServerActionResult<T = any> = OnSuccess<T> | OnError;
 export type OnSuccess<T> = {
@@ -26,4 +35,13 @@ export type Project = {
   name: string;
   description?: string;
   createdAt: Date;
+};
+
+export type Task = {
+  id: number;
+  projectId: number;
+  title: string;
+  description: string;
+  status: string;
+  createdAt: string;
 };

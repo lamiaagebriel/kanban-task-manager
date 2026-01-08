@@ -108,11 +108,7 @@ export default async function Dashboard() {
                 <CardContent className="px-2">
                   {e.description && (
                     <CardDescription className="line-clamp-2">
-                      {e.description} Lorem ipsum dolor sit, amet consectetur
-                      adipisicing elit. Officiis enim quam nobis aliquid non
-                      accusantium ex qui inventore quasi tempora nihil
-                      similique, minus nostrum nesciunt expedita laudantium
-                      totam saepe! Velit.
+                      {e.description}
                     </CardDescription>
                   )}
                 </CardContent>

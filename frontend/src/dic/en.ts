@@ -46,12 +46,22 @@ const en = {
       "You haven't created any projects yet. Get started by creating your first project.",
   },
 
+  "/p/[id]": {
+    Project: "Project",
+    "Manage all your projects effortlessly—create, browse, edit, and filter projects in one place.":
+      "Manage all your projects effortlessly—create, browse, edit, and filter projects in one place.",
+  },
+
   "project-create-button": {
     "Create Project": "Create Project",
     Name: "Name",
     Description: "Description",
     "Create a new project in Kanboard by entering the project name below.":
       "Create a new project in Kanboard by entering the project name below.",
+
+    "10 Day Workout Challenge": "10 Day Workout Challenge",
+    "A 10 day workout routine designed to help you achieve your fitness goal.":
+      "A 10 day workout routine designed to help you achieve your fitness goal.",
   },
   "project-delete-button": {
     "Delete Project": "Delete Project",

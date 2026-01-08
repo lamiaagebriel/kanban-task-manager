@@ -102,6 +102,7 @@ export function ProjectCreateButton() {
                       id={field.name}
                       name={field.name}
                       disabled={loading}
+                      placeholder={t["10 Day Workout Challenge"]}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -124,9 +125,13 @@ export function ProjectCreateButton() {
                         id={field.name}
                         name={field.name}
                         disabled={loading}
-                        placeholder="I'm having an issue with the login button on mobile."
                         rows={6}
                         className="max-h-40 min-h-24 resize-none"
+                        placeholder={
+                          t[
+                            "A 10 day workout routine designed to help you achieve your fitness goal."
+                          ]
+                        }
                       />
                       <InputGroupAddon align="block-end">
                         <InputGroupText className="tabular-nums">
