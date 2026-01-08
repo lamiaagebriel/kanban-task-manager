@@ -134,7 +134,7 @@ frontend/
 
 - Backend framework by [NestJS](https://nestjs.com)
 - Frontend bootstrapped with [Next.js](https://nextjs.org/)
-- Developed and maintained by [Your Team or Name Here]
+- Developed and maintained by [lamiaagebriel](https://github.com/lamiaagebriel)
 
 ---
 
