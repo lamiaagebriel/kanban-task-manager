@@ -7,6 +7,8 @@ import { Icons } from "@/components/ui/icons";
 import { UserAccountNav } from "@/components/user-account-nav";
 
 import { api } from "@/api";
+import { LocaleSwitcher } from "@/components/locale-provider";
+import { ModeSwitcher } from "@/components/theme-provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Breadcrumb,
@@ -75,7 +77,8 @@ export default async function ProjectLayout({
             ]}
           />
           <div className="flex items-center gap-2">
-            {/* <ModeSwitcherDropdownMenu /> */}
+            <ModeSwitcher />
+            <LocaleSwitcher />
             <UserAccountNav />
           </div>
         </div>

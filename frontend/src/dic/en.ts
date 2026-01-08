@@ -99,6 +99,14 @@ const en = {
     "This will be deleted forever.": "This will be deleted forever.",
   },
 
+  "mode-switcher": {
+    theme: "Theme",
+    "automatically switch between day and night themes.":
+      "Automatically switch between day and night themes.",
+    light: "Light",
+    dark: "Dark",
+    system: "System",
+  },
   "task-create-edit-button": {
     "Create Task": "Create Task",
     Title: "Title",

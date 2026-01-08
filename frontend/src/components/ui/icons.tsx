@@ -1,13 +1,18 @@
 import { cva, VariantProps } from "class-variance-authority";
 import {
+  CheckCheck,
   Edit2,
   FolderCode,
   GalleryVerticalEnd,
+  Globe,
   GripVertical,
+  Laptop,
   Loader2,
   LogOut,
+  Moon,
   Plus,
   Projector,
+  Sun,
   Trash2,
   User,
   X,
@@ -66,5 +71,20 @@ export const Icons = {
   ),
   folder: ({ className, ...props }: IconProps) => (
     <FolderCode className={cn(IconsVariants({}), className)} {...props} />
+  ),
+  sun: ({ className, ...props }: IconProps) => (
+    <Sun className={cn(IconsVariants({}), className)} {...props} />
+  ),
+  moon: ({ className, ...props }: IconProps) => (
+    <Moon className={cn(IconsVariants({}), className)} {...props} />
+  ),
+  laptop: ({ className, ...props }: IconProps) => (
+    <Laptop className={cn(IconsVariants({}), className)} {...props} />
+  ),
+  globe: ({ className, ...props }: IconProps) => (
+    <Globe className={cn(IconsVariants({}), className)} {...props} />
+  ),
+  check: ({ className, ...props }: IconProps) => (
+    <CheckCheck className={cn(IconsVariants({}), className)} {...props} />
   ),
 };

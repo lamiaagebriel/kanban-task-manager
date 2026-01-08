@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getAuth } from "@/lib/auth";
 import { getDictionary } from "@/servers/locale";
 
+import { LocaleSwitcher } from "@/components/locale-provider";
+import { ModeSwitcher } from "@/components/theme-provider";
 import { Icons } from "@/components/ui/icons";
 import { UserAccountNav } from "@/components/user-account-nav";
 import { Paths } from "@/lib/const";
@@ -30,6 +32,8 @@ export default async function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-2">
+            <ModeSwitcher />
+            <LocaleSwitcher />
             <UserAccountNav />
           </div>
         </div>

@@ -133,7 +133,7 @@ function KanbanColumn({
   return (
     <div
       key={column.id}
-      className="w-104"
+      className="w-104 min-w-80"
       onDragOver={handleDragOver}
       onDrop={() => handleDrop(column.id)}>
       <Card className="h-full gap-0 rounded-none pt-0">
@@ -185,14 +185,22 @@ export default function KanbanDashboard({
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
 
   const columns: Column[] = [
-    { id: TaskStatus.TODO, title: t["Todo"], color: "bg-slate-200" },
+    {
+      id: TaskStatus.TODO,
+      title: t["Todo"],
+      color: "bg-slate-200 dark:bg-slate-800",
+    },
     {
       id: TaskStatus.INPROGRESS,
       title: t["In Progress"],
-      color: "bg-blue-200",
+      color: "bg-blue-200 dark:bg-blue-800",
     },
     // { id: TaskStatus.REVIEW, title: "Review", color: "bg-yellow-200" ,},
-    { id: TaskStatus.DONE, title: t["Done"], color: "bg-green-200" },
+    {
+      id: TaskStatus.DONE,
+      title: t["Done"],
+      color: "bg-green-200 dark:bg-green-800",
+    },
   ];
 
   // For scroll while dragging support
