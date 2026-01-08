@@ -1,19 +1,12 @@
 import type { Metadata } from "next";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Link } from "@/components/ui/link";
+import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { getAuth } from "@/lib/auth";
 import { getDictionary } from "@/servers/locale";
 
 import { api } from "@/api";
-import { Button } from "@/components/ui/button";
+import { ProjectCreateEditButton } from "@/components/project-create-button";
+import { ProjectDeleteButton } from "@/components/project-delete-button";
 import {
   Empty,
   EmptyContent,
@@ -23,6 +16,9 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Icons } from "@/components/ui/icons";
+import { Link } from "@/components/ui/link";
+import { Paths } from "@/lib/const";
+import { formatDate } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { "/dashboard": c } = await getDictionary();
@@ -30,14 +26,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Dashboard() {
-  const user = (await getAuth())?.user!;
+  const { locale, "/dashboard": c } = await getDictionary();
 
-  const { "/dashboard": c } = await getDictionary();
-  const {
-    data: { projects },
-  } = await api.projects.getMany({
-    userId: user?.id,
-  });
+  const response = await api.projects.findAll();
+  const projects =
+    !!response?.ok && response?.data?.projects?.length
+      ? response.data.projects
+      : [];
+
   return (
     <main className="flex-1">
       <div className="container flex flex-1 flex-col py-6">
@@ -53,7 +49,7 @@ export default async function Dashboard() {
             </div>
 
             <div>
-              {!!projects?.length && <Button>{c["Create Project"]}</Button>}
+              {!!projects?.length && <ProjectCreateEditButton project={null} />}
             </div>
           </div>
 
@@ -78,7 +74,7 @@ export default async function Dashboard() {
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button>{c["Create Project"]}</Button>
+              <ProjectCreateEditButton project={null} />
             </EmptyContent>
           </Empty>
         )}
@@ -86,21 +82,46 @@ export default async function Dashboard() {
         {!!projects?.length && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((e, i) => (
-              <Link key={i} href={`/p/${e?.id}`}>
-                <Card className="bg-background">
-                  <CardHeader className="flex flex-row items-center justify-between gap-2">
-                    <CardTitle>{e.name}</CardTitle>
-                    <CardDescription>
-                      {new Date(e.createdAt).toLocaleDateString()}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {e.description && (
-                      <CardDescription>{e.description}</CardDescription>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
+              <Card
+                key={i}
+                className="flex flex-row items-start gap-2 border-2 p-4">
+                <div className="flex-1">
+                  <Link
+                    href={`${Paths.Projects}/${e?.id}`}
+                    className="line-clamp-2 text-base font-semibold underline">
+                    {e.name}
+                  </Link>
+
+                  {e?.description && (
+                    <p className="text-muted-foreground line-clamp-2 text-sm">
+                      {e.description}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground text-xs">
+                      {formatDate(e?.createdAt, { locale })}
+                    </span>
+
+                    <div className="flex items-center gap-1">
+                      <ProjectCreateEditButton
+                        project={e}
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full">
+                        <Icons.edit />
+                      </ProjectCreateEditButton>
+                      <ProjectDeleteButton
+                        project={e}
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full">
+                        <Icons.x className="text-destructive" />
+                      </ProjectDeleteButton>
+                    </div>
+                  </div>
+                </div>
+              </Card>
             ))}
           </div>
         )}
