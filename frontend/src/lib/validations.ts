@@ -29,6 +29,29 @@ const userSchema = z.object({
     ),
 });
 
+const projectSchema = z.object({
+  id: z
+    .number()
+    // .union([z.string(), z.number()])
+    .transform((val) => (typeof val === "string" ? Number(val) : val))
+    .pipe(z.number().int().positive("id must be a positive integer")),
+  name: z
+    .string()
+    .min(2, "Project name must be at least 2 characters.")
+    .max(128, "Project name must be at most 128 characters."),
+  description: z
+    .string()
+    .max(256, "Description must be at most 256 characters.")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  ownerId: z
+    .number()
+    // .union([z.string(), z.number()])
+    .transform((val) => (typeof val === "string" ? Number(val) : val))
+    .pipe(z.number().int().positive("ownerId must be a positive integer")),
+  createdAt: z.date().optional(),
+});
+
 const userValidations = {
   "tagret-user-by-id": userSchema.pick({ id: true }),
 };
@@ -45,11 +68,30 @@ const authValidations = {
   }),
 };
 
+const projectValidations = {
+  "target-project-by-id": projectSchema.pick({ id: true }),
+  "target-project-by-ownerId": projectSchema.pick({ ownerId: true }),
+  "target-project-by-id+ownerId": projectSchema.pick({
+    id: true,
+    ownerId: true,
+  }),
+
+  "create-project": projectSchema.pick({
+    name: true,
+    description: true,
+  }),
+  "update-project": z.object({
+    name: projectSchema.shape.name.optional(),
+    description: projectSchema.shape.description.optional(),
+  }),
+};
+
 export const validations = {
   "locale-switcher": z.object({ locale: z.enum(i18n?.locales) }),
 
   ...userValidations,
   ...authValidations,
+  ...projectValidations,
 };
 
 export type ValidationName = keyof typeof validations;

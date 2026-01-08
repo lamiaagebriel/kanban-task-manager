@@ -19,3 +19,11 @@ export type User = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type Project = {
+  id: number;
+  ownerId: number | undefined;
+  name: string;
+  description?: string;
+  createdAt: Date;
+};

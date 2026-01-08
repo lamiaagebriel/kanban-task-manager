@@ -3,21 +3,58 @@ import { twMerge } from "tailwind-merge";
 
 import { z } from "zod";
 
-import { Dictionary } from "@/lib/locale";
+import { Dictionary, Locale } from "@/lib/locale";
 import { getDictionary } from "@/servers/locale";
 import { OnError, OnSuccess, ServerActionResult } from "@/types";
+import { DateArg, format, formatDistanceToNow, FormatOptions } from "date-fns";
+import * as DateFnsLocale from "date-fns/locale";
+import { redirect } from "next/navigation";
 import type { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import { getSessionCookie } from "./auth";
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+type FormatDateOptions = {
+  formatStr?: string;
+  type?: "default" | "distance";
+} & Omit<FormatOptions, "locale">;
+
+export function formatDate(
+  date: DateArg<Date>,
+  {
+    type,
+    locale: _locale = "en",
+    formatStr: _formatStr,
+    ...opts
+  }: FormatDateOptions & { locale: Locale }
+) {
+  const locale =
+    (_locale as any) === "ar" ? DateFnsLocale.arSA : DateFnsLocale?.enUS;
+  const formatStr = (_locale as any) === "ar" ? "dd MMMM yyyy" : "PPP";
+
+  if (!date) return null;
+
+  if (type === "distance")
+    return formatDistanceToNow(date, {
+      locale,
+      // roundingMethod: "floor", // Ensure intervals are rounded down
+      // unit: "auto", // Automatically switch between s, m, h, d, etc.
+      includeSeconds: true,
+      addSuffix: true,
+    });
+
+  return format(date, formatStr, {
+    locale,
+    ...opts,
+  });
 }
 
 export const fetcher = async <T = void>(
   _url: string,
   { ...options }: RequestInit = {}
-): Promise<{ data: T }> => {
+): Promise<{ ok: true; data: T }> => {
   const SERVER_URL = "http://localhost:8000";
 
   const token = (await getSessionCookie())?.token ?? null;
@@ -44,7 +81,7 @@ export const fetcher = async <T = void>(
   }
 
   // only return data from the response
-  return { ...data } as { data: T };
+  return { ok, ...data } as { ok: true; data: T };
 };
 
 /**
@@ -104,8 +141,7 @@ export async function handleServerAction<R>(
     const result =
       typeof actionFn === "function" ? await actionFn() : await actionFn;
 
-    if (!result) return;
-    if (!result.ok) {
+    if (result && result?.ok == false) {
       // Handler for error type 1 (validation issues)
       if ("zodIssues" in result && Array.isArray(result?.zodIssues)) {
         if (!form) {
@@ -128,12 +164,10 @@ export async function handleServerAction<R>(
         toast.error(result?.message);
 
       onError?.(result);
-    }
-
-    if (result.ok) {
+    } else {
       onSuccess?.(result);
+      if (result?.redirect) redirect(result?.redirect);
       // if (result?.toast) toast[result?.toast?.type]?.(result?.toast?.message);
-      // if (result?.redirect) redirect(result?.redirect);
     }
   } finally {
     setLoading?.(false);

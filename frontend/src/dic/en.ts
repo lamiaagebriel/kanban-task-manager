@@ -8,6 +8,8 @@ const en = {
     Continue: "Continue",
     Logout: "Logout",
     "Sign up": "Sign up",
+    Cancel: "Cancel",
+    Delete: "Delete",
   },
   "/login": {
     Login: "Login",
@@ -42,7 +44,23 @@ const en = {
     "No Projects Yet": "No Projects Yet",
     "You haven't created any projects yet. Get started by creating your first project.":
       "You haven't created any projects yet. Get started by creating your first project.",
+  },
+
+  "project-create-button": {
     "Create Project": "Create Project",
+    Name: "Name",
+    Description: "Description",
+    "Create a new project in Kanboard by entering the project name below.":
+      "Create a new project in Kanboard by entering the project name below.",
+  },
+  "project-delete-button": {
+    "Delete Project": "Delete Project",
+    Name: "Name",
+    Description: "Description",
+    "Are you sure you want to delete this project?":
+      "Are you sure you want to delete this project?",
+
+    "This will be deleted forever.": "This will be deleted forever.",
   },
   actions: {
     "An unexpected error occured, Please try again later.":
@@ -54,6 +72,18 @@ const en = {
       "your user account was not logged in. Please try again.",
     "your user account was not created. please try again.":
       "your user account was not created. Please try again.",
+
+    // projects
+    "Unable to create project at this time. Please try again later.":
+      "Unable to create project at this time. Please try again later.",
+    "The requested project could not be found.":
+      "The requested project could not be found.",
+    "Unable to load your projects at the moment.":
+      "Unable to load your projects at the moment.",
+    "We couldn't update the project. Please try again shortly.":
+      "We couldn't update the project. Please try again shortly.",
+    "Unable to delete the project right now. Please try again later.":
+      "Unable to delete the project right now. Please try again later.",
   },
 };
 

@@ -5,4 +5,7 @@ export enum Paths {
 
   // (dashboard)
   Dashboard = "/",
+
+  // (projects)
+  Projects = "/p",
 }

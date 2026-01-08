@@ -5,6 +5,7 @@ import {
   Loader2,
   LogOut,
   User,
+  X,
   type LucideProps,
 } from "lucide-react";
 
@@ -26,6 +27,9 @@ export const Icons = {
       className={cn(IconsVariants({}), "animate-spin", className)}
       {...props}
     />
+  ),
+  x: ({ className, ...props }: IconProps) => (
+    <X className={cn(IconsVariants({}), className)} {...props} />
   ),
   user: ({ className, ...props }: IconProps) => (
     <User className={cn(IconsVariants({}), className)} {...props} />

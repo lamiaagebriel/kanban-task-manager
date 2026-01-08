@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/card";
 import { Link } from "@/components/ui/link";
 import { Separator } from "@/components/ui/separator";
-import { getAuth } from "@/lib/auth";
 import { getDictionary } from "@/servers/locale";
 
 import { api } from "@/api";
-import { Button } from "@/components/ui/button";
+import { ProjectCreateButton } from "@/components/project-create-button";
+import { ProjectDeleteButton } from "@/components/project-delete-button";
 import {
   Empty,
   EmptyContent,
@@ -23,6 +23,9 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Icons } from "@/components/ui/icons";
+import { Paths } from "@/lib/const";
+import { formatDate } from "@/lib/utils";
+import { Project } from "@/types";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { "/dashboard": c } = await getDictionary();
@@ -30,14 +33,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Dashboard() {
-  const user = (await getAuth())?.user!;
+  const { locale, "/dashboard": c } = await getDictionary();
 
-  const { "/dashboard": c } = await getDictionary();
-  const {
-    data: { projects },
-  } = await api.projects.getMany({
-    userId: user?.id,
-  });
+  let projects: Project[] = [];
+  const response = await api.projects.findAll();
+
+  if (!!response?.ok && response?.data?.projects?.length) {
+    projects = response?.data?.projects;
+  }
+
   return (
     <main className="flex-1">
       <div className="container flex flex-1 flex-col py-6">
@@ -52,9 +56,7 @@ export default async function Dashboard() {
               </p>
             </div>
 
-            <div>
-              {!!projects?.length && <Button>{c["Create Project"]}</Button>}
-            </div>
+            <div>{!!projects?.length && <ProjectCreateButton />}</div>
           </div>
 
           <Separator className="my-4" />
@@ -78,7 +80,7 @@ export default async function Dashboard() {
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button>{c["Create Project"]}</Button>
+              <ProjectCreateButton />
             </EmptyContent>
           </Empty>
         )}
@@ -86,21 +88,37 @@ export default async function Dashboard() {
         {!!projects?.length && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((e, i) => (
-              <Link key={i} href={`/p/${e?.id}`}>
-                <Card className="bg-background">
-                  <CardHeader className="flex flex-row items-center justify-between gap-2">
-                    <CardTitle>{e.name}</CardTitle>
-                    <CardDescription>
-                      {new Date(e.createdAt).toLocaleDateString()}
+              <Card key={i} className="bg-background gap-2 p-2">
+                <CardHeader className="flex flex-row items-center justify-between gap-2 px-2">
+                  <div>
+                    <Link
+                      href={`${Paths.Projects}/${e?.id}`}
+                      className="line-clamp-2 underline">
+                      <CardTitle className="mb-1">{e.name}</CardTitle>
+                    </Link>
+                    <CardDescription className="text-xs">
+                      {formatDate(e.createdAt, { locale, type: "distance" })}
                     </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {e.description && (
-                      <CardDescription>{e.description}</CardDescription>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
+                  </div>
+                  <ProjectDeleteButton
+                    project={e}
+                    size="sm"
+                    variant="destructive"
+                    className="h-6"
+                  />
+                </CardHeader>
+                <CardContent className="px-2">
+                  {e.description && (
+                    <CardDescription className="line-clamp-2">
+                      {e.description} Lorem ipsum dolor sit, amet consectetur
+                      adipisicing elit. Officiis enim quam nobis aliquid non
+                      accusantium ex qui inventore quasi tempora nihil
+                      similique, minus nostrum nesciunt expedita laudantium
+                      totam saepe! Velit.
+                    </CardDescription>
+                  )}
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
