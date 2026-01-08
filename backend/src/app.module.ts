@@ -9,6 +9,7 @@ import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import { ProjectsModule } from './projects/projects.module';
+import { TasksModule } from './tasks/tasks.module';
 import { UsersModule } from './users/users.module';
 import { ZodGlobalExceptionFilter } from './validations/filters/zod-global-exception.filter';
 import { ZodResponseInterceptor } from './validations/interceptors/zod-response.interceptor';
@@ -38,6 +39,7 @@ import { ZodResponseInterceptor } from './validations/interceptors/zod-response.
     AuthModule,
     UsersModule,
     ProjectsModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [

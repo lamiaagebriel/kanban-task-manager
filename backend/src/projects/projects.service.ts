@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Project } from './entities/project.entity';
 import { Validation, validations } from './projects.validations';
@@ -15,12 +14,9 @@ export class ProjectsService {
   // Helper to sanitize (serialize) the user in the project object
   private sanitizeProject(project: Project | null) {
     if (!project) return null;
+
     const { owner, ...projectRest } = project;
-    let safeOwner: Omit<User, 'password'> | null = null;
-    if (!!owner) {
-      const { password, ...safeUser } = owner;
-      safeOwner = safeUser;
-    }
+    const { password: _, ...safeOwner } = owner ?? {};
 
     return {
       ...projectRest,
