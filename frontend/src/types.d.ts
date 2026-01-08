@@ -22,7 +22,7 @@ export type OnError = { ok: false } & (
 
 // db schemas
 export type User = {
-  id: number;
+  id: string;
   email: string;
   name: string;
   createdAt: Date;
@@ -30,18 +30,18 @@ export type User = {
 };
 
 export type Project = {
-  id: number;
-  ownerId: number | undefined;
+  id: string;
+  ownerId: string;
   name: string;
   description?: string;
   createdAt: Date;
 };
 
 export type Task = {
-  id: number;
-  projectId: number;
+  projectId: string;
+  id: string;
   title: string;
   description: string;
-  status: string;
-  createdAt: string;
+  status: TaskStatus;
+  createdAt: Date;
 };

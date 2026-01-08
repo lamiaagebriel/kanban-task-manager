@@ -18,27 +18,26 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { handleServerAction } from "@/lib/utils";
-import { deleteProject } from "@/servers/projects";
-import { Project } from "@/types";
+import { deleteTask } from "@/servers/tasks";
+import { Task } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { Icons } from "./ui/icons";
 
-const formSchema = validations["target-project-by-id"];
+const formSchema = validations["target-task-by-id"];
 type FormSchema = z.infer<typeof formSchema>;
 
-type ProjectDeleteButtonProps = { project: Pick<Project, "id"> } & ButtonProps;
+type TaskDeleteButtonProps = {
+  task: Pick<Task, "id" | "projectId">;
+} & ButtonProps;
 
-export function ProjectDeleteButton({
-  project,
-  ...props
-}: ProjectDeleteButtonProps) {
+export function TaskDeleteButton({ task, ...props }: TaskDeleteButtonProps) {
   const [loading, setLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
-  const { "project-delete-button": t, cmn } = useLocale();
+  const { "task-delete-button": t, cmn } = useLocale();
 
-  const defaultValues: FormSchema = { id: project?.id! };
+  const defaultValues: FormSchema = { id: task?.id! };
   const form = useForm<FormSchema>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
@@ -47,14 +46,17 @@ export function ProjectDeleteButton({
 
   const onSubmit = async (values: FormSchema) => {
     setOpen(true);
-    await handleServerAction(() => deleteProject(values), {
-      form,
-      setLoading,
-      onSuccess: () => {
-        form.reset(defaultValues);
-        setOpen(false);
-      },
-    });
+    await handleServerAction(
+      () => deleteTask({ ...values, projectId: task?.projectId }),
+      {
+        form,
+        setLoading,
+        onSuccess: () => {
+          form.reset(defaultValues);
+          setOpen(false);
+        },
+      }
+    );
   };
 
   return (
@@ -78,9 +80,9 @@ export function ProjectDeleteButton({
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             <AlertDialogHeader>
-              <AlertDialogTitle>{t["Delete Project"]}</AlertDialogTitle>
+              <AlertDialogTitle>{t["Delete Task"]}</AlertDialogTitle>
               <AlertDialogDescription>
-                {t["Are you sure you want to delete this project?"]}
+                {t["Are you sure you want to delete this task?"]}
                 <br />
                 {t["This will be deleted forever."]}
               </AlertDialogDescription>

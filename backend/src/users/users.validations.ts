@@ -1,10 +1,10 @@
 import z from 'zod';
-
+// Used to coerce ids and projectId from string to number (UUID support)
+const idField = z.string().uuid({
+  message: 'id must be a valid UUID',
+});
 export const userSchema = z.object({
-  id: z
-    .union([z.string(), z.number()])
-    .transform((val) => (typeof val === 'string' ? Number(val) : val))
-    .pipe(z.number().int().positive('id must be a positive integer')),
+  id: idField,
   name: z
     .string()
     .min(2, 'Name must be at least 2 characters.')
@@ -21,11 +21,7 @@ export const userSchema = z.object({
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters.')
-    .max(100, 'Password must be at most 100 characters.')
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
-    ),
+    .max(100, 'Password must be at most 100 characters.'),
 });
 
 export const validations = {

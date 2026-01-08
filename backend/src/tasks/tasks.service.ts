@@ -60,8 +60,12 @@ export class TasksService {
     return this.sanitizeTask(task);
   }
 
-  async create(props: Validation['create-task']) {
-    const { projectId, ...parsed } = validations['create-task'].parse(props);
+  async create(
+    props: Validation['create-task'] & Validation['target-task-by-projectId'],
+  ) {
+    const { projectId, ...parsed } = validations['create-task']
+      .and(validations['target-task-by-projectId'])
+      .parse(props);
     const task = this.tasksRepository.create({
       ...parsed,
       project: { id: projectId },

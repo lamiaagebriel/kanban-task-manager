@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { validations } from "@/lib/validations";
+import { TaskStatus, validations } from "@/lib/validations";
 import { Button, ButtonProps } from "./ui/button";
 
 import { useLocale } from "@/components/locale-provider";
@@ -18,12 +18,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { handleServerAction } from "@/lib/utils";
-import { createProject, updateProject } from "@/servers/projects";
-import { Project } from "@/types";
+import { createTask, updateTask } from "@/servers/tasks";
+import { Project, Task } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { Input } from "./ui/input";
+
+import { cn } from "@/lib/utils";
 
 import { FieldError } from "@/components/ui/field";
 
@@ -33,26 +35,38 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "./ui/input-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
-const formSchema = validations["update-project"];
+const formSchema = validations["update-task"];
 type FormSchema = z.infer<typeof formSchema>;
 
-type ProjectCreateEditButtonProps = {
-  project: Partial<Pick<Project, "id" | "name" | "description">> | null;
+type TaskCreateEditButtonProps = {
+  task: Partial<Pick<Task, "id" | "title" | "description" | "status">> | null;
+  project: Pick<Project, "id">;
+  columns: any;
 } & ButtonProps;
 
-export function ProjectCreateEditButton({
+export function TaskCreateEditButton({
+  task,
   project,
+  columns,
   ...props
-}: ProjectCreateEditButtonProps) {
+}: TaskCreateEditButtonProps) {
   const [loading, setLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
-  const { "project-create-button": t, cmn } = useLocale();
+  const { "/p/[id]": t, cmn } = useLocale();
 
-  const isEditing = !!project?.id;
+  const isEditing = !!task?.id;
   const defaultValues: FormSchema = {
-    name: project?.name ?? "",
-    description: project?.description ?? "",
+    title: task?.title ?? "",
+    description: task?.description ?? "",
+    status: task?.status ?? TaskStatus.TODO,
   };
 
   const form = useForm<FormSchema>({
@@ -64,13 +78,18 @@ export function ProjectCreateEditButton({
     setOpen(true);
     await handleServerAction(
       () => {
-        if (isEditing && project?.id) {
-          return updateProject({
+        if (isEditing && task?.id) {
+          return updateTask({
             ...values,
-            id: project?.id,
+            id: task?.id,
+            projectId: project?.id,
           });
         } else {
-          return createProject({ ...values });
+          return createTask({
+            ...values,
+            projectId: project?.id,
+            title: values?.title!,
+          });
         }
       },
       {
@@ -94,7 +113,7 @@ export function ProjectCreateEditButton({
       <AlertDialogTrigger asChild>
         <Button {...props}>
           {props?.children ?? (
-            <>{isEditing ? t["Edit Project"] : t["Add New Project"]}</>
+            <>{isEditing ? t["Edit Task"] : t["Add New Task"]}</>
           )}
         </Button>
       </AlertDialogTrigger>
@@ -103,24 +122,22 @@ export function ProjectCreateEditButton({
           <FieldGroup>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {isEditing ? t["Edit Project"] : t["Add New Project"]}
+                {isEditing ? t["Edit Task"] : t["Add New Task"]}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                {
-                  t[
-                    "Create a new project in Kanboard by entering the project name below."
-                  ]
-                }
+                {t["Are you sure you want to delete this task?"]}
+                <br />
+                {t["This will be deleted forever."]}
               </AlertDialogDescription>
             </AlertDialogHeader>
 
             <div className="flex flex-col gap-4">
               <Controller
-                name="name"
+                name="title"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>{t["Name"]}</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t["Title"]}</FieldLabel>
                     <Input
                       {...field}
                       autoFocus
@@ -171,6 +188,47 @@ export function ProjectCreateEditButton({
                   </Field>
                 )}
               />
+
+              <Controller
+                name="status"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>{t["Status"]}</FieldLabel>
+
+                    <Select
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      name={field.name}
+                      disabled={loading}
+                      onValueChange={(v) => field?.onChange(v)}>
+                      <SelectTrigger
+                        id={field.name}
+                        name={field.name}
+                        disabled={loading}
+                        className="w-full">
+                        <SelectValue placeholder={t["choose status..."]} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {columns.map((col: any) => (
+                          <SelectItem key={col.id} value={col.id}>
+                            <span
+                              className={cn(
+                                "bg-primary size-4 rounded-full",
+                                col.color
+                              )}
+                            />
+                            {col.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
             </div>
 
             <AlertDialogFooter>
@@ -179,7 +237,7 @@ export function ProjectCreateEditButton({
               </AlertDialogCancel>
               <Field>
                 <Button type="submit" disabled={loading}>
-                  {isEditing ? t["Update Project"] : t["Add Project"]}
+                  {isEditing ? t["Update Task"] : t["Add Task"]}
                 </Button>
               </Field>
               {/* <AlertDialogAction>Continue</AlertDialogAction> */}

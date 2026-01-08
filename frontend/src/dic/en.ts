@@ -50,10 +50,38 @@ const en = {
     Project: "Project",
     "Manage all your projects effortlessly—create, browse, edit, and filter projects in one place.":
       "Manage all your projects effortlessly—create, browse, edit, and filter projects in one place.",
+
+    "Kanban Board": "Kanban Board",
+    Todo: "Todo",
+    "In Progress": "In Progress",
+    Done: "Done",
+
+    "Add New Task": "Add New Task",
+    "Edit Task": "Edit Task",
+    "Update Task": "Update Task",
+    "Add Task": "Add Task",
+    Title: "Title",
+    Description: "Description",
+    Status: "Status",
+    "choose status...": "choose status...",
+    "Enter task title": "Enter task title",
+    "Enter task description": "Enter task description",
+    "No Tasks Yet": "No Tasks Yet",
+    "You haven't created any tasks yet.": "You haven't created any tasks yet.",
+    "Are you sure you want to delete this task?":
+      "Are you sure you want to delete this task?",
+    "This will be deleted forever.": "This will be deleted forever.",
+
+    "10 Day Workout Challenge": "10 Day Workout Challenge",
+    "A 10 day workout routine designed to help you achieve your fitness goal.":
+      "A 10 day workout routine designed to help you achieve your fitness goal.",
   },
 
   "project-create-button": {
-    "Create Project": "Create Project",
+    "Add New Project": "Add New Project",
+    "Edit Project": "Edit Project",
+    "Update Project": "Update Project",
+    "Add Project": "Add Project",
     Name: "Name",
     Description: "Description",
     "Create a new project in Kanboard by entering the project name below.":
@@ -65,10 +93,27 @@ const en = {
   },
   "project-delete-button": {
     "Delete Project": "Delete Project",
-    Name: "Name",
-    Description: "Description",
     "Are you sure you want to delete this project?":
       "Are you sure you want to delete this project?",
+
+    "This will be deleted forever.": "This will be deleted forever.",
+  },
+
+  "task-create-edit-button": {
+    "Create Task": "Create Task",
+    Title: "Title",
+    Description: "Description",
+    "Create a new task in Kanboard by entering the task name below.":
+      "Create a new task in Kanboard by entering the task name below.",
+
+    "10 Day Workout Challenge": "10 Day Workout Challenge",
+    "A 10 day workout routine designed to help you achieve your fitness goal.":
+      "A 10 day workout routine designed to help you achieve your fitness goal.",
+  },
+  "task-delete-button": {
+    "Delete Task": "Delete Task",
+    "Are you sure you want to delete this task?":
+      "Are you sure you want to delete this task?",
 
     "This will be deleted forever.": "This will be deleted forever.",
   },
@@ -94,6 +139,18 @@ const en = {
       "We couldn't update the project. Please try again shortly.",
     "Unable to delete the project right now. Please try again later.":
       "Unable to delete the project right now. Please try again later.",
+
+    // tasks
+    "Unable to create task at this time. Please try again later.":
+      "Unable to create task at this time. Please try again later.",
+    "The requested task could not be found.":
+      "The requested task could not be found.",
+    "Unable to load your tasks at the moment.":
+      "Unable to load your tasks at the moment.",
+    "We couldn't update the task. Please try again shortly.":
+      "We couldn't update the task. Please try again shortly.",
+    "Unable to delete the task right now. Please try again later.":
+      "Unable to delete the task right now. Please try again later.",
   },
 };
 

@@ -125,7 +125,7 @@ export const uncachedGetAuth = async (): Promise<GetAuthResponse> => {
   try {
     const {
       data: { user: fetchedUser },
-    } = await api.users.findOne({ id: Number(session?.userId) });
+    } = await api.users.findOne({ id: session?.userId });
 
     user = fetchedUser;
   } catch (error) {

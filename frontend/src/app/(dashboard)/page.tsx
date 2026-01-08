@@ -1,18 +1,11 @@
 import type { Metadata } from "next";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Link } from "@/components/ui/link";
+import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getDictionary } from "@/servers/locale";
 
 import { api } from "@/api";
-import { ProjectCreateButton } from "@/components/project-create-button";
+import { ProjectCreateEditButton } from "@/components/project-create-button";
 import { ProjectDeleteButton } from "@/components/project-delete-button";
 import {
   Empty,
@@ -23,6 +16,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Icons } from "@/components/ui/icons";
+import { Link } from "@/components/ui/link";
 import { Paths } from "@/lib/const";
 import { formatDate } from "@/lib/utils";
 
@@ -54,7 +48,9 @@ export default async function Dashboard() {
               </p>
             </div>
 
-            <div>{!!projects?.length && <ProjectCreateButton />}</div>
+            <div>
+              {!!projects?.length && <ProjectCreateEditButton project={null} />}
+            </div>
           </div>
 
           <Separator className="my-4" />
@@ -78,7 +74,7 @@ export default async function Dashboard() {
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <ProjectCreateButton />
+              <ProjectCreateEditButton project={null} />
             </EmptyContent>
           </Empty>
         )}
@@ -86,32 +82,45 @@ export default async function Dashboard() {
         {!!projects?.length && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((e, i) => (
-              <Card key={i} className="bg-background gap-2 p-2">
-                <CardHeader className="flex flex-row items-center justify-between gap-2 px-2">
-                  <div>
-                    <Link
-                      href={`${Paths.Projects}/${e?.id}`}
-                      className="line-clamp-2 underline">
-                      <CardTitle className="mb-1">{e.name}</CardTitle>
-                    </Link>
-                    <CardDescription className="text-xs">
-                      {formatDate(e.createdAt, { locale, type: "distance" })}
-                    </CardDescription>
-                  </div>
-                  <ProjectDeleteButton
-                    project={e}
-                    size="sm"
-                    variant="destructive"
-                    className="h-6"
-                  />
-                </CardHeader>
-                <CardContent className="px-2">
-                  {e.description && (
-                    <CardDescription className="line-clamp-2">
+              <Card
+                key={i}
+                className="flex flex-row items-start gap-2 border-2 p-4">
+                <div className="flex-1">
+                  <Link
+                    href={`${Paths.Projects}/${e?.id}`}
+                    className="line-clamp-2 text-base font-semibold underline">
+                    {e.name}
+                  </Link>
+
+                  {e?.description && (
+                    <p className="text-muted-foreground line-clamp-2 text-sm">
                       {e.description}
-                    </CardDescription>
+                    </p>
                   )}
-                </CardContent>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground text-xs">
+                      {formatDate(e?.createdAt, { locale })}
+                    </span>
+
+                    <div className="flex items-center gap-1">
+                      <ProjectCreateEditButton
+                        project={e}
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full">
+                        <Icons.edit />
+                      </ProjectCreateEditButton>
+                      <ProjectDeleteButton
+                        project={e}
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full">
+                        <Icons.x className="text-destructive" />
+                      </ProjectDeleteButton>
+                    </div>
+                  </div>
+                </div>
               </Card>
             ))}
           </div>

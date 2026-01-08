@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { getAuth } from "@/lib/auth";
 import { getDictionary } from "@/servers/locale";
@@ -6,6 +6,7 @@ import { getDictionary } from "@/servers/locale";
 import { Icons } from "@/components/ui/icons";
 import { UserAccountNav } from "@/components/user-account-nav";
 
+import { api } from "@/api";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Breadcrumb,
@@ -19,13 +20,25 @@ import { Paths } from "@/lib/const";
 import { SelectItem } from "@/types";
 import React from "react";
 
-type ProjectLayoutProps = React.PropsWithChildren<{}>;
-export default async function ProjectLayout({ children }: ProjectLayoutProps) {
+type ProjectLayoutProps = React.PropsWithChildren<{
+  params: Promise<{ id: string }>;
+}>;
+export default async function ProjectLayout({
+  children,
+  params,
+}: ProjectLayoutProps) {
+  const { id: projectId } = await params;
   const { user } = await getAuth();
   if (!user) redirect(Paths.Login);
 
+  const response_ = await api.projects.findOne({ id: projectId });
+  const project =
+    !!response_?.ok && !!response_?.data?.project
+      ? response_.data.project
+      : null;
+  if (!project) throw notFound();
+
   const { site } = await getDictionary();
-  const project = { id: 36, name: "10 Days Workout" };
   return (
     <div className="bg-muted/50 flex min-h-screen flex-col">
       <header className="bg-background text-foreground z-20 flex flex-col gap-4 py-4">

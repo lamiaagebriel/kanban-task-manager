@@ -1,10 +1,12 @@
 import z from 'zod';
 
+// Used to coerce ids and projectId from string to number (UUID support)
+const idField = z.string().uuid({
+  message: 'id must be a valid UUID',
+});
 export const projectSchema = z.object({
-  id: z
-    .union([z.string(), z.number()])
-    .transform((val) => (typeof val === 'string' ? Number(val) : val))
-    .pipe(z.number().int().positive('id must be a positive integer')),
+  id: idField,
+  ownerId: idField,
   name: z
     .string()
     .min(2, 'Project name must be at least 2 characters.')
@@ -14,10 +16,6 @@ export const projectSchema = z.object({
     .max(4096, 'Description must be at most 4096 characters.')
     .optional()
     .or(z.literal('').transform(() => undefined)),
-  ownerId: z
-    .union([z.string(), z.number()])
-    .transform((val) => (typeof val === 'string' ? Number(val) : val))
-    .pipe(z.number().int().positive('ownerId must be a positive integer')),
   createdAt: z.date().optional(),
 });
 
@@ -33,9 +31,9 @@ export const validations = {
     name: true,
     description: true,
   }),
-  'update-project': z.object({
-    name: projectSchema.shape.name.optional(),
-    description: projectSchema.shape.description.optional(),
+  'update-project': projectSchema.pick({
+    name: true,
+    description: true,
   }),
 };
 

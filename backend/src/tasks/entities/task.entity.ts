@@ -17,8 +17,8 @@ export enum TaskStatus {
 
 @Entity('tasks')
 export class Task {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => Project)
   @JoinColumn({ name: 'projectId' })

@@ -16,6 +16,18 @@ export const createProject = createServerAction(
   }
 );
 
+export const updateProject = createServerAction(
+  async (
+    formData: Validation["target-project-by-id"] & Validation["update-project"]
+  ) => {
+    await api.projects.update(formData);
+    revalidateTag("projects", "max");
+  },
+  {
+    defaultErrorMessage:
+      "We couldn't update the project. Please try again shortly.",
+  }
+);
 export const deleteProject = createServerAction(
   async (formData: Validation["target-project-by-id"]) => {
     await api.projects.remove(formData);
