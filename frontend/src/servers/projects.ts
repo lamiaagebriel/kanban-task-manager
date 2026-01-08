@@ -17,7 +17,7 @@ export const createProject = createServerAction(
 );
 
 export const deleteProject = createServerAction(
-  async (formData: Validation["target-project-by-id+ownerId"]) => {
+  async (formData: Validation["target-project-by-id"]) => {
     await api.projects.remove(formData);
     revalidateTag("projects", "max");
   },

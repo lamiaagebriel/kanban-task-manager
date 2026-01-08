@@ -43,13 +43,14 @@ export function ProjectCreateButton() {
   const [open, setOpen] = React.useState(false);
   const { "project-create-button": t, cmn } = useLocale();
 
+  const defaultValues = {
+    name: "",
+    description: "",
+  };
   const form = useForm<FormSchema>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-    },
+    defaultValues,
   });
 
   const onSubmit = async (values: FormSchema) => {
@@ -58,7 +59,7 @@ export function ProjectCreateButton() {
       form,
       setLoading,
       onSuccess: () => {
-        form.reset();
+        form.reset(defaultValues);
         setOpen(false);
       },
     });
@@ -69,7 +70,7 @@ export function ProjectCreateButton() {
       open={open}
       onOpenChange={(o) => {
         setOpen(o);
-        form.reset();
+        form.reset(defaultValues);
       }}>
       <AlertDialogTrigger asChild>
         <Button>{t["Create Project"]}</Button>
@@ -96,6 +97,7 @@ export function ProjectCreateButton() {
                     <FieldLabel htmlFor={field.name}>{t["Name"]}</FieldLabel>
                     <Input
                       {...field}
+                      autoFocus
                       aria-invalid={fieldState.invalid}
                       id={field.name}
                       name={field.name}

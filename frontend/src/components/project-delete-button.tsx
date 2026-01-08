@@ -23,10 +23,9 @@ import { Project } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { useAuth } from "./auth-provider";
 import { Icons } from "./ui/icons";
 
-const formSchema = validations["target-project-by-id+ownerId"];
+const formSchema = validations["target-project-by-id"];
 type FormSchema = z.infer<typeof formSchema>;
 
 type ProjectDeleteButtonProps = { project: Pick<Project, "id"> } & ButtonProps;
@@ -37,16 +36,13 @@ export function ProjectDeleteButton({
 }: ProjectDeleteButtonProps) {
   const [loading, setLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
-  const { user } = useAuth();
   const { "project-delete-button": t, cmn } = useLocale();
 
+  const defaultValues = { id: project?.id! };
   const form = useForm<FormSchema>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      id: project?.id!,
-      ownerId: user?.id!,
-    },
+    defaultValues,
   });
 
   const onSubmit = async (values: FormSchema) => {
@@ -55,7 +51,7 @@ export function ProjectDeleteButton({
       form,
       setLoading,
       onSuccess: () => {
-        form.reset();
+        form.reset(defaultValues);
         setOpen(false);
       },
     });
@@ -66,7 +62,7 @@ export function ProjectDeleteButton({
       open={open}
       onOpenChange={(o) => {
         setOpen(o);
-        form.reset();
+        form.reset(defaultValues);
       }}>
       <AlertDialogTrigger asChild>
         <Button {...props}>

@@ -49,8 +49,6 @@ export const projects = {
   remove: async (formData: Validation["target-project-by-id"]) => {
     const { id } = validations["target-project-by-id"].parse(formData);
 
-    return fetcher(`/api/projects/${id}`, {
-      method: "DELETE",
-    });
+    return fetcher(`/api/projects/${id}`, { method: "DELETE" });
   },
 };

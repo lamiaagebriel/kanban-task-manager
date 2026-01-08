@@ -25,7 +25,6 @@ import {
 import { Icons } from "@/components/ui/icons";
 import { Paths } from "@/lib/const";
 import { formatDate } from "@/lib/utils";
-import { Project } from "@/types";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { "/dashboard": c } = await getDictionary();
@@ -35,12 +34,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Dashboard() {
   const { locale, "/dashboard": c } = await getDictionary();
 
-  let projects: Project[] = [];
   const response = await api.projects.findAll();
-
-  if (!!response?.ok && response?.data?.projects?.length) {
-    projects = response?.data?.projects;
-  }
+  const projects =
+    !!response?.ok && response?.data?.projects?.length
+      ? response.data.projects
+      : [];
 
   return (
     <main className="flex-1">

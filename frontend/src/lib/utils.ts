@@ -72,7 +72,28 @@ export const fetcher = async <T = void>(
     },
   });
 
-  const { ok, ...data } = await response?.json();
+  let data: any;
+  let ok: boolean;
+
+  // Handle empty body responses gracefully
+  const text = await response.text();
+  if (!text) {
+    // If the response has no body, e.g. DELETE, treat as ok=true
+    if (response.ok) {
+      return { ok: true, data: undefined as T } as { ok: true; data: T };
+    }
+    throw new Error("Empty response from server.");
+  }
+
+  try {
+    const parsed = JSON.parse(text);
+    ok = parsed.ok;
+    data = { ...parsed };
+    delete data.ok;
+  } catch (e) {
+    throw new Error("Failed to parse server response.");
+  }
+
   if (!ok) {
     if (data?.zodIssues) throw new z.ZodError(data?.zodIssues);
     throw new Error(
@@ -81,7 +102,7 @@ export const fetcher = async <T = void>(
   }
 
   // only return data from the response
-  return { ok, ...data } as { ok: true; data: T };
+  return { ok: true, ...data } as { ok: true; data: T };
 };
 
 /**

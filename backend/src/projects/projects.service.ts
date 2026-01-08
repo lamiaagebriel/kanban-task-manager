@@ -101,9 +101,7 @@ export class ProjectsService {
       id,
       owner: { id: ownerId },
     });
-
-    if (!(result?.affected !== undefined && !!result?.affected)) {
-      throw new Error('There is no project with this id');
-    }
+    const deleted = !!result?.affected && result.affected > 0;
+    if (!deleted) throw new Error('There is no project with this id');
   }
 }
